@@ -1,0 +1,165 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "70ca3bc9-715b-4a39-85ea-8c7352b9183b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1q0yEmw9qlvH1jtQvZOGAW6Dsj6TGAZVaXm1UqHjxVMU",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1q0yEmw9qlvH1jtQvZOGAW6Dsj6TGAZVaXm1UqHjxVMU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1q0yEmw9qlvH1jtQvZOGAW6Dsj6TGAZVaXm1UqHjxVMU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        220,
+        0
+      ],
+      "id": "012edd72-e116-4001-a795-39f998a827f5",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9xAzz4QtNjj9dxbn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Check the invoice status using the fields below:\n- Client Name: {{ $json[\"Client Name\"] }}\n- Due Date: {{ $json[\"Due Date\"] }}\n- Invoice Amount: {{ $json[\"Invoice Amount\"] }}\n- Status: {{ $json[\"Status\"] }}\n- invoice: {{ $json['Invoice ID'] }}\nIf the invoice is \"Unpaid\", generate a formal and friendly reminder email addressed to the client. The email should include:\n- The client’s name\n- The invoice due date\n- The invoice amount\n\nIf the status is \"Paid\", return only the word: Paid.\n\nDo not generate any message or email if the invoice is paid.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        420,
+        0
+      ],
+      "id": "0eac2819-780e-4fb5-8981-8f857b3c80a0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        480,
+        220
+      ],
+      "id": "3388c0bb-989b-4713-8260-aac2558ef1f6",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DacmBVHRtlSqSYd9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets').item.json['Email'] }}",
+        "subject": "Remainder",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        0
+      ],
+      "id": "e9ebf525-a509-4191-94e9-619daa390333",
+      "name": "Gmail",
+      "webhookId": "30218861-01a5-4f57-b372-95076834827d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "upr9Feeo3mnFMhRi",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "546b7039-babf-426a-a8ea-cc517bd40c5c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5dcdce2fa6e2450a06f81e4df9494423e395baa1d79654277ced3071997f6b4b"
+  },
+  "id": "yRd6DdclBOuTIt4k",
+  "tags": []
+}
