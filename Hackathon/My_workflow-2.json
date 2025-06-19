@@ -1,0 +1,988 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        220
+      ],
+      "id": "32cdaedc-fae6-4c62-9c52-77998415274d",
+      "name": "Telegram Trigger",
+      "webhookId": "9bd0eb89-4f0c-4360-a220-41b6f93a696b",
+      "credentials": {
+        "telegramApi": {
+          "id": "6vD94AWpWMlE3JkS",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=this is the text message from the lead. can sperate the name,service and deadline and follow this formate and give it :\nuse this is the text:\n{{ $json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        60,
+        240
+      ],
+      "id": "6d7a6605-5abe-409f-b2af-6ec2fb3b665a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        460
+      ],
+      "id": "b2982806-a1c1-41d3-8848-9f8fdd192aba",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DacmBVHRtlSqSYd9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1rzfKhjAijazo3bQMgRtq5AnUKk2cNhr4N6trWxKWm-0",
+          "mode": "list",
+          "cachedResultName": "hackathon 16",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rzfKhjAijazo3bQMgRtq5AnUKk2cNhr4N6trWxKWm-0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2043745815,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rzfKhjAijazo3bQMgRtq5AnUKk2cNhr4N6trWxKWm-0/edit#gid=2043745815"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json['**Name'] }}",
+            "Service": "={{ $json['**Service'] }}",
+            "Deadline": "={{ $json['**Deadline'] }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1120,
+        140
+      ],
+      "id": "2195f134-2b3b-446f-87c6-a5103619adc9",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9xAzz4QtNjj9dxbn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  const output = item?.json?.output;\n  const lines = output.split(\"\\n\").filter((line) => line.includes(\":\"));\n  const data = {};\n  lines.forEach((line) => {\n    const [key, value] = line.split(\":\").map((part) => part.trim());\n    data[key] = value;\n  });\n  return { json: data };\n});\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        120
+      ],
+      "id": "bd8a2219-6ba7-433c-b7d8-0c68d5792100",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=reply professionally to the text  {{ $('Telegram Trigger').item.json.message.text }}\n\nand use this name \n{{ $json.Name }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        180
+      ],
+      "id": "f5ba5b13-b7c5-42e1-8109-f64a9ab5f1cc",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        400
+      ],
+      "id": "cdc196bb-f70d-475d-b41d-9c28ca1fa637",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DacmBVHRtlSqSYd9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an intelligent assistant designed to scan incoming emails. Your goal is to detect potential leads based on specific intent and keywords. Extract and summarize emails where the sender is showing interest in:\nScheduling a product demo\nAsking about project availability\nRequesting information on services\nShowing intent to collaborate, partner, or request a proposal\nKeywords to look for (not case sensitive):\nproject, projects, product demo, demo, schedule a demo, collaboration, partner, proposal, requirement, service, need your product, interested in your product, want to connect, looking for a solution, can we connect, business opportunity, explore synergy\nIf an email contains any of these keywords or phrases in the subject or body and shows potential business interest, flag it as a lead.\nOutput Format:\nSender Name\nSender Email\nSubject\nSummary of Intent (based on content)\nSuggested Action (e.g., \"Respond to schedule demo\", \"Forward to BD team\", etc.)\"\n\neamil body: {{ $json.snippet }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        120,
+        -60
+      ],
+      "id": "c30d4f06-29f6-4a0d-b2ac-585d6d2b0f70",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=reply professionally to the text  \n{{ $('Gmail1').item.json.snippet }}\nand use this name \n{{ $json.Name }}\nand use this signature at the last \nDinakar\nSNS Square\nBusiness Development Executive \n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        -60
+      ],
+      "id": "00e8dc27-c466-405a-bbea-37a2114e8c6b",
+      "name": "AI Agent4"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1rzfKhjAijazo3bQMgRtq5AnUKk2cNhr4N6trWxKWm-0",
+          "mode": "list",
+          "cachedResultName": "hackathon 16",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rzfKhjAijazo3bQMgRtq5AnUKk2cNhr4N6trWxKWm-0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1709128183,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rzfKhjAijazo3bQMgRtq5AnUKk2cNhr4N6trWxKWm-0/edit#gid=1709128183"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Service": "={{ $json.service }}",
+            "Details ": "={{ $json.senderName }}"
+          },
+          "matchingColumns": [
+            "Details "
+          ],
+          "schema": [
+            {
+              "id": "Details ",
+              "displayName": "Details ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        860,
+        -60
+      ],
+      "id": "2ca26ea8-6c43-4336-9ece-c41c9845b085",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9xAzz4QtNjj9dxbn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail1').item.json.From }}",
+        "subject": "Thanks for reaching out ",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1680,
+        -60
+      ],
+      "id": "678164a3-4381-40c3-9edc-a5fab9188929",
+      "name": "Gmail",
+      "webhookId": "b4bb89b0-7d38-4b18-85be-6b3fafb50b49",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KXHvsYe9cz2DoBo0",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -300,
+        740
+      ],
+      "id": "b76d8899-41ee-4737-80b2-a86d5bfa1839",
+      "name": "Telegram Trigger1",
+      "webhookId": "1033517a-ff8b-4c65-8e6b-e29dc3bdedd8",
+      "credentials": {
+        "telegramApi": {
+          "id": "6vD94AWpWMlE3JkS",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "4def7551-0b68-4b97-b338-a5aae9b78892"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1b08a6f2-2cb5-4a08-8608-83b115372811",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "642acaa9-a16a-4287-ae6a-2306f0c2d1a2",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        60,
+        760
+      ],
+      "id": "9b608dae-986e-4dbd-aff5-89627bce7de5",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        280,
+        560
+      ],
+      "id": "df2eebe2-f106-4ef1-8132-571f9e7ae7b0",
+      "name": "Telegram1",
+      "webhookId": "31dc9dc2-c8dd-4176-bd80-ae5e474ca7cd",
+      "credentials": {
+        "telegramApi": {
+          "id": "6vD94AWpWMlE3JkS",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        500,
+        560
+      ],
+      "id": "1c23fb72-3648-46fa-acc5-80e25370e08b",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "rNq5M5PCmiD1hMcB",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=this is the text message from the lead. can sperate the name,service and deadline and follow this formate and give it :\nuse this is the text:\n{{ $json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        760,
+        740
+      ],
+      "id": "165db82c-8fbe-4e74-b050-27494b9412fa",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        960
+      ],
+      "id": "ac863d18-bf8b-4681-980c-3486d8f5b2f4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "rNq5M5PCmiD1hMcB",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1720,
+        180
+      ],
+      "id": "4c84c285-8063-42db-9edb-f7ca4cc3c948",
+      "name": "Telegram",
+      "webhookId": "1fded5ff-fa48-47ac-bf90-e822a9667471",
+      "credentials": {
+        "telegramApi": {
+          "id": "6vD94AWpWMlE3JkS",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1160,
+        720
+      ],
+      "id": "00faa0c8-6ebd-4173-b110-ed4fa9b2ac57",
+      "name": "Telegram2",
+      "webhookId": "1fded5ff-fa48-47ac-bf90-e822a9667471",
+      "credentials": {
+        "telegramApi": {
+          "id": "6vD94AWpWMlE3JkS",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7f9a4a0d-0fc1-4054-881c-49d999425ea8",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        780
+      ],
+      "id": "b16ae655-0569-4d83-85e8-60958acd98fb",
+      "name": "text"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        1040
+      ],
+      "id": "3bdf3435-8fcc-415a-9f46-7b94babb767a",
+      "name": "Error"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        -60
+      ],
+      "id": "5a136728-6ff1-4d76-ab38-a266a985f09f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        -60
+      ],
+      "id": "37623c5f-9583-4054-a6e7-a7543eafa988",
+      "name": "Gmail1",
+      "webhookId": "865d7408-a0e6-4970-bb0d-ff929799c35e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KXHvsYe9cz2DoBo0",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  const output = $input.first().json.output\n  const [senderName, senderMail, service] = output.split(\",\");\n\n  return {\n    senderName,\n    senderMail,\n    service,\n  };\n});\n\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        -260
+      ],
+      "id": "fd6549c4-7e49-47a9-8ad2-a8e4736fcc40",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "66a29965-253a-4de1-aab3-d4f7303cb3bb",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "projects",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "e61607db-2b6f-4ae4-8b4f-81013ecdc543",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "project",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "39da85cb-733d-4ea0-958f-96179c1d3517",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "product demo",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "15e5cf2e-06f2-439d-bf7a-eb265e3dc7d4",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "demo",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "f2cd3fb1-de33-42b4-a9bb-3a41c9ea1820",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "=quotation",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "4676f6b4-eed9-4224-b000-48ff78389ffa",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "development",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        -60
+      ],
+      "id": "7bf93b71-b537-49e6-9133-e7800b01bfed",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent4": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "text": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2811729e-c527-4215-b0ce-6ec2b69b6b8f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5dcdce2fa6e2450a06f81e4df9494423e395baa1d79654277ced3071997f6b4b"
+  },
+  "id": "HVHpXRr1Bre1C8et",
+  "tags": []
+}
